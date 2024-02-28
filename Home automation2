@@ -1,0 +1,77 @@
+#include <iostream>
+
+class TemperatureSensor {
+public:
+    virtual float getCurrentTemperature() const = 0;
+};
+
+class BathroomTemperatureSensor : public TemperatureSensor {
+public:
+    float getCurrentTemperature() const override {
+        
+        return 20.0f; 
+    }
+};
+
+class HeatingSystem {
+public:
+    virtual float calculateRequiredTemperature(float currentTemperature) const = 0;
+};
+
+class SimpleHeatingSystem : public HeatingSystem {
+public:
+    float calculateRequiredTemperature(float currentTemperature) const override {
+      
+        return currentTemperature + 10.0f;
+    }
+};
+
+class Geyser {
+private:
+    const TemperatureSensor& temperatureSensor;
+    const HeatingSystem& heatingSystem;
+    float heatingTemperature;
+
+public:
+    Geyser(const TemperatureSensor& sensor, const HeatingSystem& system)
+        : temperatureSensor(sensor), heatingSystem(system), heatingTemperature(0.0f) {}
+
+    void activateGeyser() {
+        float currentTemperature = temperatureSensor.getCurrentTemperature();
+        heatingTemperature = heatingSystem.calculateRequiredTemperature(currentTemperature);
+    }
+
+    float getHeatingTemperature() const {
+        return heatingTemperature;
+    }
+};
+
+class SmartHomeSystem {
+public:
+    void activateGeyser(Geyser& geyser) const {
+        geyser.activateGeyser();
+    }
+};
+
+class Homeowner {
+public:
+    void getOutOfBed(const SmartHomeSystem& smartHomeSystem, Geyser& geyser) const {
+        smartHomeSystem.activateGeyser(geyser);
+    }
+};
+
+int main() {
+    BathroomTemperatureSensor bathroomSensor;
+    SimpleHeatingSystem heatingSystem;
+    Geyser geyser(bathroomSensor, heatingSystem);
+    SmartHomeSystem smartHomeSystem;
+    Homeowner homeowner;
+
+    
+    homeowner.getOutOfBed(smartHomeSystem, geyser);
+
+    
+    std::cout << "Heating temperature: " << geyser.getHeatingTemperature() << std::endl;
+
+    return 0;
+}
